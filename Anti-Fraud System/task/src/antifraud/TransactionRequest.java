@@ -3,6 +3,8 @@ package antifraud;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 public class TransactionRequest {
 
     @Min(1)
@@ -11,6 +13,24 @@ public class TransactionRequest {
     private String ip;
     @NotNull
     private String number;
+    private String region;
+    private LocalDateTime date;
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 
     public String getIp() {
         return ip;

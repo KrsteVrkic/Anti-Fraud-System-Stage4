@@ -4,15 +4,15 @@ import jakarta.validation.Valid;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.commons.validator.routines.checkdigit.LuhnCheckDigit;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Validated
 @RestController
@@ -22,14 +22,18 @@ public class FraudController {
     private final SusIpAddressRepository susIpAddressRepository;
     private final PasswordEncoder passwordEncoder;
     private final StolenCardRepository stolenCardRepository;
+    private final TransactionRepository transactionRepository;
+    private final List<String> regionCodex;
 
     public FraudController(AppUserRepository repository, SusIpAddressRepository susIpAddressRepository,
-                           PasswordEncoder passwordEncoder, StolenCardRepository stolenCardRepository) {
-
+                           PasswordEncoder passwordEncoder, StolenCardRepository stolenCardRepository,
+                           TransactionRepository transactionRepository, List<String> regionCodex) {
+        this.transactionRepository = transactionRepository;
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.stolenCardRepository = stolenCardRepository;
         this.susIpAddressRepository = susIpAddressRepository;
+        this.regionCodex = List.of("EAP", "ECA", "HIC", "LAC", "MENA", "SA", "SSA");
     }
 
     @PostMapping(path = "/api/auth/user")
@@ -71,40 +75,93 @@ public class FraudController {
         long sum = request.getAmount();
         String number = request.getNumber();
         String ip = request.getIp();
+        String region = request.getRegion();
+        LocalDateTime date = request.getDate();
+        var start = date.minusHours(1);
+        String status = "why dont you initialize me";
+
         List<String> errors = new ArrayList<>();
+        Transaction transaction = new Transaction();
         TransactionResponse response = new TransactionResponse();
 
         InetAddressValidator validator = InetAddressValidator.getInstance();
         if (!validator.isValidInet4Address(ip)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Not valid IP");
+                "Wrong ip format");
 
         if (!LuhnCheckDigit.LUHN_CHECK_DIGIT.isValid(number)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Wrong card number format");
 
+        if (!regionCodex.contains(region)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid region format");
+
+        if (isDateValid(date)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Invalid date format");
+
+        if (transactionRepository.countDistinctRegions(region, number, start, date) > 2) {
+            errors.add("region-correlation");
+            status = "PROHIBITED";
+        }
+
+        if (transactionRepository.countUniqueIp(ip, start, date) > 2) {
+            errors.add("ip-correlation");
+            status = "PROHIBITED";
+        }
+
+        if (transactionRepository.countDistinctRegions(region, number, start, date) == 2) {
+            errors.add("region-correlation");
+            status = "MANUAL_PROCESSING";
+        }
+
+        if (transactionRepository.countUniqueIp(ip, start, date) == 2) {
+            errors.add("ip-correlation");
+            status = "MANUAL_PROCESSING";
+        }
+
         if (susIpAddressRepository.existsByIp(ip)) errors.add("ip");
         if (stolenCardRepository.existsByNumber(number)) errors.add("card-number");
 
-        if (sum <= 200) {
+        if (errors.isEmpty() && sum <= 200) {
             errors.add("none");
-            response.setResult("ALLOWED");
+            status = "ALLOWED";
         } else if (sum <= 1500) {
             if (errors.contains("ip") || errors.contains("card-number")) {
-                response.setResult("PROHIBITED");
+                status = "PROHIBITED";
             } else {
-                response.setResult("MANUAL_PROCESSING");
-                errors.add("amount");
+                if (!status.equals("PROHIBITED")) {
+                    status = "MANUAL_PROCESSING";
+                }
+                if (errors.isEmpty()) {
+                    errors.add("amount");
+                }
             }
         } else {
             errors.add("amount");
-            response.setResult("PROHIBITED");
+            status = "PROHIBITED";
         }
 
+        transaction.setAmount(sum);
+        transaction.setIp(ip);
+        transaction.setNumber(number);
+        transaction.setRegion(region);
+        transaction.setDate(date);
 
+        transactionRepository.save(transaction);
         String result = errors.stream().sorted().collect(Collectors.joining(", "));
-
         response.setInfo(result);
-
+        response.setResult(status);
         return response;
+    }
+
+    public boolean isDateValid(LocalDateTime date) {
+
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+        try {
+            LocalDateTime parseDate = LocalDateTime.parse(date.toString(), format);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @DeleteMapping("/api/auth/user/{username}")
@@ -183,8 +240,9 @@ public class FraudController {
         susAddress.setIp(request.ip());
 
         InetAddressValidator validator = InetAddressValidator.getInstance();
-        if (!validator.isValidInet4Address(susAddress.getIp())) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Not valid IP");
+        if (!validator.isValidInet4Address(susAddress.getIp()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Not valid IP");
 
         Optional<SusIpAddress> ipOptional = susIpAddressRepository.findSusIpAddressByIp(request.ip);
         if (ipOptional.isPresent()) throw new ResponseStatusException(HttpStatus.CONFLICT,
@@ -213,6 +271,7 @@ public class FraudController {
         response.put("status", result);
         return response;
     }
+
     @GetMapping("/api/antifraud/suspicious-ip")
     public List<SusIpAddress> getSusIpList() {
         return susIpAddressRepository.findAllByOrderById();
@@ -226,8 +285,9 @@ public class FraudController {
         Optional<StolenCard> cardOptional = stolenCardRepository.findByNumber(request.number);
         if (cardOptional.isPresent()) throw new ResponseStatusException(HttpStatus.CONFLICT,
                 "Number exists in database");
-        if (!LuhnCheckDigit.LUHN_CHECK_DIGIT.isValid(request.number)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Wrong card number format");
+        if (!LuhnCheckDigit.LUHN_CHECK_DIGIT.isValid(request.number))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Wrong card number format");
 
         stolenCardRepository.save(stolenCard);
         return stolenCard;
@@ -258,9 +318,11 @@ public class FraudController {
         return stolenCardRepository.findAllByOrderById();
     }
 
-    public record StolenCardRequest(String number) {}
+    public record StolenCardRequest(String number) {
+    }
 
-    public record SusIpRequest(String ip) {}
+    public record SusIpRequest(String ip) {
+    }
 }
 
 

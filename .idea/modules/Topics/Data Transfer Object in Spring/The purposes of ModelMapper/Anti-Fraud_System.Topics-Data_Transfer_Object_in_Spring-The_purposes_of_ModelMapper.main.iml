@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":Topics-Data_Transfer_Object_in_Spring-The_purposes_of_ModelMapper:main" external.linked.project.path="$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/The purposes of ModelMapper" external.root.project.path="$MODULE_DIR$/../../../../.." external.system.id="GRADLE" external.system.module.group="Anti-Fraud System" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/The purposes of ModelMapper/out/production/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/The purposes of ModelMapper/src">
+      <sourceFolder url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/The purposes of ModelMapper/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

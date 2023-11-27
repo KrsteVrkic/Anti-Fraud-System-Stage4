@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":Topics-Data_Transfer_Object_in_Spring-Converting_a_DTO_to_a_Java_class_implementation" external.linked.project.path="$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/Converting a DTO to a Java class implementation" external.root.project.path="$MODULE_DIR$/../../../../.." external.system.id="GRADLE" external.system.module.group="Anti-Fraud System" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/Converting a DTO to a Java class implementation">
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/Converting a DTO to a Java class implementation/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/Converting a DTO to a Java class implementation/build" />
+      <excludeFolder url="file://$MODULE_DIR$/../../../../../Topics/Data Transfer Object in Spring/Converting a DTO to a Java class implementation/out" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
