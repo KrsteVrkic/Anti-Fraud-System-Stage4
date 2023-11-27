@@ -5,12 +5,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 @Entity
-public class SusIpAddress {
+public class StolenCard {
 
     @Id
     @GeneratedValue()
     private long id;
-    private String ip;
+    private String number;
+
+    public StolenCard() {}
 
     public long getId() {
         return id;
@@ -20,11 +22,11 @@ public class SusIpAddress {
         this.id = id;
     }
 
-    public String getIp() {
-        return ip;
+    public String getNumber() {
+        return number;
     }
 
-    public void setIp(String ip) {
-        this.ip = ip;
+    public void setNumber(String number) {
+        this.number = number;
     }
 }

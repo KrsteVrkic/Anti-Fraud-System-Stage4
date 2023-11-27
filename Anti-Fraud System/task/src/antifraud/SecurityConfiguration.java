@@ -40,6 +40,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PUT, "/api/auth/role/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.PUT, "/api/auth/access/**").hasAuthority("ROLE_ADMINISTRATOR")
                         .requestMatchers(HttpMethod.DELETE, "/api/auth/user/{username}").hasRole("ADMINISTRATOR")
+                        .requestMatchers("/api/antifraud/suspicious-ip/**").hasRole("SUPPORT")
+                        .requestMatchers("/api/antifraud/stolencard/**").hasRole("SUPPORT")
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll()

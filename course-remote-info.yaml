@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://cogniterra.org/media/attachments/lesson/26277/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: "Thu, 23 Nov 2023 13:22:53 UTC"
+update_date: "Fri, 24 Nov 2023 13:39:54 UTC"
 stages:
   - id: 1161
     step: 18067
@@ -16,7 +16,7 @@ stages:
     is_completed: true
   - id: 1164
     step: 18070
-    is_completed: false
+    is_completed: true
   - id: 1165
     step: 18071
     is_completed: false
@@ -41,24 +41,18 @@ topics:
       theory_id: 8977
     - title: Parameters and options
       theory_id: 9746
-    - title: Fixed-size array
-      theory_id: 20078
     - title: Spring and Spring Boot frameworks
       theory_id: 7944
     - title: Getting started with Spring Boot
       theory_id: 6336
     - title: Immutability
       theory_id: 7929
+    - title: Fixed-size array
+      theory_id: 20078
     - title: Dynamic array
       theory_id: 5357
-    - title: HTTP URL
-      theory_id: 6740
     - title: Basic project structure
       theory_id: 6339
-    - title: Introduction to Spring Web MVC
-      theory_id: 13611
-    - title: Using Spring MVC
-      theory_id: 28136
     - title: IoC Container
       theory_id: 16851
     - title: Spring beans
@@ -73,6 +67,12 @@ topics:
       theory_id: 19487
     - title: Bean lifecycle
       theory_id: 19550
+    - title: HTTP URL
+      theory_id: 6740
+    - title: Introduction to Spring Web MVC
+      theory_id: 13611
+    - title: Using Spring MVC
+      theory_id: 28136
     - title: HTTP messages
       theory_id: 6752
     - title: REST
@@ -106,7 +106,7 @@ topics:
     - title: Spring actuator
       theory_id: 27488
     - title: Introduction to Java
-      theory_id: 3500
+      theory_id: 38627
     - title: "Basic literals: numbers, strings and characters"
       theory_id: 3522
     - title: Writing first program
@@ -167,8 +167,6 @@ topics:
       theory_id: 3511
     - title: Arrays as parameters
       theory_id: 3594
-    - title: Iterating over arrays
-      theory_id: 3602
     - title: Characters
       theory_id: 3514
     - title: String
@@ -181,6 +179,8 @@ topics:
       theory_id: 3497
     - title: NullPointerException
       theory_id: 1945
+    - title: Iterating over arrays
+      theory_id: 3602
     - title: What is object-oriented programming
       theory_id: 3614
     - title: Grouping classes with packages
@@ -207,8 +207,6 @@ topics:
       theory_id: 8504
     - title: Frameworks
       theory_id: 6701
-    - title: Concept of design patterns
-      theory_id: 3611
     - title: What are bugs
       theory_id: 5504
     - title: Functional testing
@@ -217,16 +215,8 @@ topics:
       theory_id: 7545
     - title: Dependency injection
       theory_id: 20580
-    - title: Introduction to software architecture
-      theory_id: 15368
-    - title: HTML basics
-      theory_id: 6434
-    - title: Tags and Attributes
-      theory_id: 7536
-    - title: HTML page structure
-      theory_id: 6491
-    - title: What are databases
-      theory_id: 8497
+    - title: Concept of design patterns
+      theory_id: 3611
     - title: Interfaces
       theory_id: 9640
     - title: YAML
@@ -235,10 +225,20 @@ topics:
       theory_id: 8956
     - title: Coupling and cohesion
       theory_id: 21478
+    - title: Introduction to software architecture
+      theory_id: 15368
     - title: "Synchronous, asynchronous, parallel"
       theory_id: 9332
     - title: Processes and threads
       theory_id: 9420
+    - title: HTML basics
+      theory_id: 6434
+    - title: Tags and Attributes
+      theory_id: 7536
+    - title: HTML page structure
+      theory_id: 6491
+    - title: What are databases
+      theory_id: 8497
     - title: JSON
       theory_id: 6854
     - title: XML
@@ -283,8 +283,6 @@ topics:
       theory_id: 3581
     - title: The Set interface
       theory_id: 3575
-    - title: MVC
-      theory_id: 17197
     - title: Threads as objects
       theory_id: 4875
     - title: Custom threads
@@ -299,6 +297,8 @@ topics:
       theory_id: 3557
     - title: Collections and thread-safety
       theory_id: 4984
+    - title: MVC
+      theory_id: 17197
     - title: The Map interface
       theory_id: 3558
     - title: Thread-safe maps
@@ -319,12 +319,12 @@ topics:
       theory_id: 6692
     - title: Referencing subclass objects
       theory_id: 3585
-    - title: Object class
-      theory_id: 3596
     - title: Multiple constructors
       theory_id: 3538
     - title: Keyword "super"
       theory_id: 3588
+    - title: Object class
+      theory_id: 3596
     - title: Objects and their properties
       theory_id: 4727
     - title: Static members
@@ -344,14 +344,14 @@ topics:
       theory_id: 28141
     - title: Property expressions
       theory_id: 28236
+    - title: Custom User Store
+      theory_id: 32430
     - title: Intro to H2 database
       theory_id: 27725
     - title: Relational databases with Spring Data
       theory_id: 18086
     - title: HTTP Basic Auth
       theory_id: 7778
-    - title: Custom User Store
-      theory_id: 32430
     - title: Relational Data Model
       theory_id: 13785
     - title: "SQL: structured query language"
@@ -374,12 +374,12 @@ topics:
       theory_id: 9059
     - title: Basic DELETE statement
       theory_id: 9075
-    - title: Object-Relational Mapping (ORM)
-      theory_id: 8312
     - title: The NULL value
       theory_id: 7907
     - title: Special WHERE operators
       theory_id: 10521
+    - title: Object-Relational Mapping (ORM)
+      theory_id: 8312
     - title: Intro to MySQL
       theory_id: 16662
     - title: Introduction to JPA
@@ -419,12 +419,12 @@ topics:
       theory_id: 25602
     - title: Custom queries with @Query
       theory_id: 27291
+    - title: Single Responsibility Principle
+      theory_id: 8963
     - title: Results ordering
       theory_id: 8627
     - title: Limit and Offset
       theory_id: 18793
-    - title: Single Responsibility Principle
-      theory_id: 8963
     - title: Stack
       theory_id: 20203
     - title: Iterator and Iterable
