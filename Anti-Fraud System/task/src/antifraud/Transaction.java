@@ -1,23 +1,42 @@
 package antifraud;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 public class Transaction {
 
     @Id
     @GeneratedValue
+    @JsonProperty("transactionId")
     private long id;
     private long amount;
     private String ip;
     private String number;
     private String region;
     private LocalDateTime date;
+    private String result;
+    private String feedback;
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getFeedback() {
+        return feedback == null ? "" : feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
 
     public long getId() {
         return id;

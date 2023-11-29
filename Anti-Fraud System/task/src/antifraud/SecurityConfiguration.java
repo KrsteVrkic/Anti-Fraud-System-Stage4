@@ -1,5 +1,6 @@
 package antifraud;
 
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -42,6 +43,9 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/api/auth/user/{username}").hasRole("ADMINISTRATOR")
                         .requestMatchers("/api/antifraud/suspicious-ip/**").hasRole("SUPPORT")
                         .requestMatchers("/api/antifraud/stolencard/**").hasRole("SUPPORT")
+                        .requestMatchers(HttpMethod.PUT, "/api/antifraud/transaction").hasRole("SUPPORT")
+                        .requestMatchers(HttpMethod.GET, "/api/antifraud/history").hasRole("SUPPORT")
+                        .requestMatchers(HttpMethod.GET, "/api/antifraud/history/{number}").hasRole("SUPPORT")
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().denyAll()

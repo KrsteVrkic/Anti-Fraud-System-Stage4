@@ -3,7 +3,7 @@ hyperskill_project:
   ide_files: https://cogniterra.org/media/attachments/lesson/26277/additional_files.json
   is_template_based: false
   use_ide: true
-update_date: "Fri, 24 Nov 2023 13:39:54 UTC"
+update_date: "Wed, 29 Nov 2023 08:18:49 UTC"
 stages:
   - id: 1161
     step: 18067
@@ -22,7 +22,7 @@ stages:
     is_completed: true
   - id: 1166
     step: 18072
-    is_completed: false
+    is_completed: true
 topics:
   0:
     - title: Modulo division
@@ -380,10 +380,10 @@ topics:
       theory_id: 10521
     - title: Object-Relational Mapping (ORM)
       theory_id: 8312
-    - title: Intro to MySQL
-      theory_id: 16662
     - title: Introduction to JPA
       theory_id: 17125
+    - title: Intro to MySQL
+      theory_id: 16662
     - title: Introduction to transactions
       theory_id: 12144
     - title: Understanding Transactions

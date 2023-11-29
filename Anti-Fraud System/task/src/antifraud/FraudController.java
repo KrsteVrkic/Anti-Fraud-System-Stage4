@@ -24,15 +24,17 @@ public class FraudController {
     private final StolenCardRepository stolenCardRepository;
     private final TransactionRepository transactionRepository;
     private final List<String> regionCodex;
+    private final List<String> feedbackCodex;
 
     public FraudController(AppUserRepository repository, SusIpAddressRepository susIpAddressRepository,
                            PasswordEncoder passwordEncoder, StolenCardRepository stolenCardRepository,
-                           TransactionRepository transactionRepository, List<String> regionCodex) {
-        this.transactionRepository = transactionRepository;
+                           TransactionRepository transactionRepository, List<String> regionCodex, List<String> feedbackCodex) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.stolenCardRepository = stolenCardRepository;
+        this.transactionRepository = transactionRepository;
         this.susIpAddressRepository = susIpAddressRepository;
+        this.feedbackCodex = List.of("ALLOWED", "PROHIBITED", "MANUAL_PROCESSING");
         this.regionCodex = List.of("EAP", "ECA", "HIC", "LAC", "MENA", "SA", "SSA");
     }
 
@@ -67,6 +69,48 @@ public class FraudController {
         return repository.findByOrderById().stream().map(e -> new RegistrationResponse(e.getId(),
                 e.getName(), e.getUsername(), e.getAuthority())).toList();
 
+    }
+
+    @GetMapping("/api/antifraud/history")
+    public List<Transaction> getTransHistory() {
+
+        return transactionRepository.findAllByOrderById();
+    }
+
+    @GetMapping( "/api/antifraud/history/{number}")
+    public List<Transaction> getTransaction(@PathVariable String number) {
+
+        if (!LuhnCheckDigit.LUHN_CHECK_DIGIT.isValid(number)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Wrong card number format");
+        var trans = transactionRepository.findByNumber(number);
+        if (trans.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "transaction not found");
+        return trans;
+    }
+
+    @PutMapping("/api/antifraud/transaction")
+    public Transaction putTransaction(@RequestBody putTransRequest request) {
+
+        Optional<Transaction> optionalTrans = transactionRepository.findById(request.transactionId);
+        var trans = optionalTrans.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Transaction not found"));
+
+        // If the feedback has the wrong format
+        if (!feedbackCodex.contains(request.feedback)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong feedback format");
+        }
+        // Throw exceptions according to the table
+        if (trans.getResult().equals(request.feedback)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Feedback already exists");
+        }
+        // If the feedback for a specified transaction is already in the database
+        if (!trans.getFeedback().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Feedback already in database");
+        }
+
+        trans.setFeedback(request.feedback);
+        transactionRepository.save(trans);
+
+        return trans;
     }
 
     @PostMapping("/api/antifraud/transaction")
@@ -120,10 +164,21 @@ public class FraudController {
         if (susIpAddressRepository.existsByIp(ip)) errors.add("ip");
         if (stolenCardRepository.existsByNumber(number)) errors.add("card-number");
 
-        if (errors.isEmpty() && sum <= 200) {
+        List<Transaction> transList = transactionRepository.findByNumber(number);
+        long allowed = 200;
+        long manual = 1500;
+        for (Transaction trans: transList) {
+            if (feedbackCodex.contains(trans.getFeedback())) {
+                allowed = calculateNewLimitForAllowed(allowed, trans.getAmount(), trans.getFeedback(), trans.getResult());
+                manual = calculateNewLimitForManual(manual, trans.getAmount(), trans.getFeedback(), trans.getResult());
+            }
+        }
+
+
+        if (errors.isEmpty() && sum <= allowed) {
             errors.add("none");
             status = "ALLOWED";
-        } else if (sum <= 1500) {
+        } else if (sum <= manual) {
             if (errors.contains("ip") || errors.contains("card-number")) {
                 status = "PROHIBITED";
             } else {
@@ -144,6 +199,7 @@ public class FraudController {
         transaction.setNumber(number);
         transaction.setRegion(region);
         transaction.setDate(date);
+        transaction.setResult(status);
 
         transactionRepository.save(transaction);
         String result = errors.stream().sorted().collect(Collectors.joining(", "));
@@ -151,6 +207,60 @@ public class FraudController {
         response.setResult(status);
         return response;
     }
+
+    public long calculateNewLimitForAllowed(long currentLimit, long amount, String feedback, String validity) {
+
+
+        if ("ALLOWED".equals(feedback) && "MANUAL_PROCESSING".equals(validity))  {
+            return adjustUp(currentLimit, amount);
+        }
+
+        if ("ALLOWED".equals(feedback) && "PROHIBITED".equals(validity))  {
+            return adjustUp(currentLimit, amount);
+        }
+
+        if ("MANUAL_PROCESSING".equals(feedback) && "ALLOWED".equals(validity)) {
+            return adjustDown(currentLimit, amount);
+        }
+
+        if ("PROHIBITED".equals(feedback) && "ALLOWED".equals(validity)) {
+            return adjustDown(currentLimit, amount);
+        }
+
+        return currentLimit;
+    }
+
+    public long calculateNewLimitForManual(long currentLimit, long amount, String feedback, String validity) {
+
+        if ("ALLOWED".equals(feedback) && "PROHIBITED".equals(validity)) {
+            return adjustUp(currentLimit, amount);
+        }
+
+        if ("MANUAL_PROCESSING".equals(feedback) && "PROHIBITED".equals(validity)) {
+            return adjustUp(currentLimit, amount);
+        }
+
+        if ("PROHIBITED".equals(feedback) && "MANUAL_PROCESSING".equals(validity)) {
+            return adjustDown(currentLimit, amount);
+        }
+
+        if ("PROHIBITED".equals(feedback) && "ALLOWED".equals(validity)) {
+            return adjustDown(currentLimit, amount);
+        }
+        return currentLimit;
+    }
+
+    private static long adjustDown(long currentLimit, long amount) {
+        double result = 0.8 * currentLimit - 0.2 * amount;
+        double newLimit = Math.ceil(result);
+        return (long) newLimit;
+    }
+    private static long adjustUp(long currentLimit, long amount) {
+        double result = 0.8 * currentLimit + 0.2 * amount;
+        double newLimit = Math.ceil(result);
+        return (long) newLimit;
+    }
+
 
     public boolean isDateValid(LocalDateTime date) {
 
@@ -316,6 +426,9 @@ public class FraudController {
     @GetMapping("/api/antifraud/stolencard")
     public List<StolenCard> getStolenCardList() {
         return stolenCardRepository.findAllByOrderById();
+    }
+
+    public record putTransRequest(long transactionId, String feedback) {
     }
 
     public record StolenCardRequest(String number) {
